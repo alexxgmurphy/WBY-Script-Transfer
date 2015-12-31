@@ -1,0 +1,144 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+int main()
+{
+	string line;
+	string issue = "004";
+	string page = "0";
+	string panel = "0";
+	string location = issue + "_";
+	string speaker = "";
+	string speech = "";
+	int count = 0;
+
+
+	ifstream inFile("script.txt");
+	ofstream outFile("updated.txt");
+	inFile.tie(&outFile);
+	fstream fs;
+	fstream update;
+	fs.open("script.txt");
+	update.open("updated.txt");
+	if (update.is_open())
+	{
+		if (fs.is_open())
+		{
+			while (!fs.eof())
+			{
+				location = issue;
+				location += "_";
+				line.clear();
+				getline(fs, line);
+				size_t found = line.find("PAGE");
+				if (line.find("PAGE") != string::npos)
+				{
+					if (line.size() == 6)
+					{
+						page = "00";
+						page += line[5];
+					}
+					else if (line.size() == 7)
+					{
+						page = "0";
+						page += line[5];
+						page += line[6];
+					}
+					else
+					{
+						cout << "PAGE NUMBER NOT FOUND" << endl;
+					}
+				}
+				location += page;
+				location += "_";
+				if (line.find("Panel") != string::npos)
+				{
+					panel = "00";
+					panel += line[6];
+					location += panel;
+					cout << location << endl;
+					outFile << location << endl;
+				}
+				found = line.find(": ");
+				if (line.find(": ") != string::npos)
+				{
+					speech = "";
+					speaker = "";
+					for (int i = 0; i < found + 1; i++)
+					{ 
+						if (isalpha(line[i]))
+						{
+							speaker += line[i];
+						}
+						else if (i > 0 && !isalpha(line[i]) && isalpha(line[i-1]))
+						{
+							speaker += line[i];
+						}
+						else if (line[i] == ':' || line[i] == '(' || line[i] == ')')
+						{
+							speaker += line[i];
+						}
+						else if (i > 0 && !isalpha(line[i]) && line[i - 1] == ',')
+						{
+							speaker += line[i];
+						}
+					}
+					line.erase(0, found+1);
+					while (line.find(".") != string::npos)
+					{
+						outFile << speaker;
+						size_t found = line.find(".");
+						speech = "";
+						for (int i = 0; i < found+1; i++)
+						{
+							outFile << line[i];
+						}
+						line.erase(0, found + 1);
+						outFile << "\n";
+					}
+					while (line.find("!") != string::npos)
+					{
+						outFile << speaker;
+						size_t found = line.find("!");
+						speech = "";
+						for (int i = 0; i < found+1; i++)
+						{
+							outFile << line[i];
+						}
+						line.erase(0, found + 1);
+						outFile << "\n";
+					}
+					while (line.find("?") != string::npos)
+					{
+						outFile << speaker;
+						size_t found = line.find("?");
+						speech = "";
+						for (int i = 0; i < found+1; i++)
+						{
+							outFile << line[i];
+						}
+						line.erase(0, found + 1);
+						outFile << "\n";
+					}
+					while (line.find("…") != string::npos)
+					{
+						outFile << speaker;
+						size_t found = line.find("…");
+						speech = "";
+						for (int i = 0; i < found + 1; i++)
+						{
+							outFile << line[i];
+						}
+						line.erase(0, found + 1);
+						outFile << "\n";
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
